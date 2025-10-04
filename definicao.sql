@@ -1,14 +1,6 @@
 CREATE TABLE IF NOT EXISTS Genero(
-    Id INT PRIMARY KEY NOT NULL,
+    IdGenero INT PRIMARY KEY NOT NULL,
     Nome VARCHAR(50) NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS AtraidoPor(
-    IdAtracao INT PRIMARY KEY NOT NULL,
-    IdUsuario INT NOT NULL,
-    IdGenero INT NOT NULL,
-    FOREIGN KEY (IdUsuario) REFERENCES Usuario(IdUsuario),
-    FOREIGN KEY (IdGenero) REFERENCES Genero(Id)
 );
 
 CREATE TABLE IF NOT EXISTS Usuario(
@@ -16,9 +8,9 @@ CREATE TABLE IF NOT EXISTS Usuario(
     Cidade VARCHAR(50) NOT NULL,
     DataNascimento DATE NOT NULL,
     Nome VARCHAR(100) NOT NULL,
-    Bio VARCHAR(280) NOT NULL
+    Bio VARCHAR(280) NOT NULL,
     IdGenero INTEGER NOT NULL,
-    FOREIGN KEY (IdGenero) REFERENCES Genero(Id),
+    FOREIGN KEY (IdGenero) REFERENCES Genero(IdGenero)
 );
 
 CREATE TABLE IF NOT EXISTS FotoUsuario(
@@ -26,6 +18,14 @@ CREATE TABLE IF NOT EXISTS FotoUsuario(
     IdUsuario INTEGER NOT NULL,
     UrlFoto VARCHAR(100) NOT NULL,
     FOREIGN KEY (IdUsuario) REFERENCES Usuario(IdUsuario)
+);
+
+CREATE TABLE IF NOT EXISTS AtraidoPor(
+    IdAtracao INT PRIMARY KEY NOT NULL,
+    IdUsuario INT NOT NULL,
+    IdGenero INT NOT NULL,
+    FOREIGN KEY (IdUsuario) REFERENCES Usuario(IdUsuario),
+    FOREIGN KEY (IdGenero) REFERENCES Genero(IdGenero)
 );
 
 CREATE TABLE IF NOT EXISTS Rating(
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS Visualizou(
 CREATE TABLE IF NOT EXISTS DeuMatch(
     IdDeuMatch INT PRIMARY KEY,
     DataCriacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    MatchSucesso BOOLEAN NOT NULL DEFAULT FALSE,
+    MatchSucesso BOOLEAN NOT NULL,
     IdUsuarioDeuLike INTEGER NOT NULL,
     IdUsuarioRecebeuLike INTEGER NOT NULL,
     FOREIGN KEY (IdUsuarioDeuLike) REFERENCES Usuario(IdUsuario),
