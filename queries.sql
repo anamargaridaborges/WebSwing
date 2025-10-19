@@ -1,3 +1,42 @@
+-- query para cálculo do rating de um usuário
+WITH RECURSIVE ratings_by_time AS (
+  SELECT valor, datacriacao, ROW_NUMBER() OVER (ORDER BY datacriacao) AS row_num
+  FROM rating
+  WHERE IdUsuario = 3
+),
+rating_timeline(valor, datacriacao, row_num) AS (
+  SELECT Valor, datacriacao, row_num
+  FROM ratings_by_time
+  WHERE row_num = 1
+
+  UNION ALL
+
+  SELECT bt.Valor * 0.25 + tl.valor * 0.75, bt.datacriacao, bt.row_num
+  FROM ratings_by_time bt
+  JOIN rating_timeline tl ON bt.row_num = tl.row_num + 1
+)
+SELECT tm.datacriacao, tm.valor
+FROM rating_timeline tm;
+
+-- query para montar o feed de um usuário
+SELECT *
+FROM usuario u
+WHERE u.IdUsuario != 1
+AND u.cidade = (SELECT cidade FROM usuario WHERE IdUsuario = 1)
+AND EXISTS (
+  SELECT * 
+  FROM AtraidoPor ap
+  WHERE ap.IdUsuario = 1
+  AND ap.IdGenero = u.IdGenero
+)
+AND EXISTS (
+  SELECT *
+  FROM AtraidoPor ap
+  JOIN Usuario u_logado ON u_logado.IdUsuario = 1
+  WHERE ap.IdUsuario = u.IdUsuario
+  AND ap.IdGenero = u_logado.IdGenero
+);
+
 -- query para calcular a distância de match entre dois usuários
 WITH RECURSIVE distancias(idUsuario, distancia, visitados) AS (
     SELECT 
@@ -31,25 +70,6 @@ SELECT idUsuario, MIN(distancia) AS distancia
 FROM distancias
 GROUP BY idUsuario
 ORDER BY distancia, idUsuario;
-
--- query para montar o feed de um usuário
-SELECT *
-FROM usuario u
-WHERE u.IdUsuario != 1
-AND u.cidade = (SELECT cidade FROM usuario WHERE IdUsuario = 1)
-AND EXISTS (
-  SELECT * 
-  FROM AtraidoPor ap
-  WHERE ap.IdUsuario = 1
-  AND ap.IdGenero = u.IdGenero
-)
-AND EXISTS (
-  SELECT *
-  FROM AtraidoPor ap
-  JOIN Usuario u_logado ON u_logado.IdUsuario = 1
-  WHERE ap.IdUsuario = u.IdUsuario
-  AND ap.IdGenero = u_logado.IdGenero
-);
 
 -- query para estatísticas de sexualidades
 -- nesse exemplo, eu calculo a porcentagem de matches
@@ -103,26 +123,6 @@ SELECT
         2
     ) AS PorcentagemHomemRatingMenor
 FROM PegarRatingDoMatch;
-
--- query para cálculo do rating de um usuário
-WITH RECURSIVE ratings_by_time AS (
-  SELECT valor, datacriacao, ROW_NUMBER() OVER (ORDER BY datacriacao) AS row_num
-  FROM rating
-  WHERE IdUsuario = 3
-),
-rating_timeline(valor, datacriacao, row_num) AS (
-  SELECT Valor, datacriacao, row_num
-  FROM ratings_by_time
-  WHERE row_num = 1
-
-  UNION ALL
-
-  SELECT bt.Valor * 0.25 + tl.valor * 0.75, bt.datacriacao, bt.row_num
-  FROM ratings_by_time bt
-  JOIN rating_timeline tl ON bt.row_num = tl.row_num + 1
-)
-SELECT tm.datacriacao, tm.valor
-FROM rating_timeline tm;
 
 --query para puxar avaliações de um usuário
 SELECT a.datacriacao, a.valor, a.comentario, esc.nome
