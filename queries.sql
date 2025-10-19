@@ -103,3 +103,22 @@ SELECT
         2
     ) AS PorcentagemHomemRatingMenor
 FROM PegarRatingDoMatch;
+
+WITH RECURSIVE ratings_by_time AS (
+  SELECT valor, datacriacao, ROW_NUMBER() OVER (ORDER BY datacriacao) AS row_num
+  FROM rating
+  WHERE IdUsuario = 3
+),
+rating_timeline(valor, datacriacao, row_num) AS (
+  SELECT Valor, datacriacao, row_num
+  FROM ratings_by_time
+  WHERE row_num = 1
+
+  UNION ALL
+
+  SELECT bt.Valor * 0.25 + tl.valor * 0.75, bt.datacriacao, bt.row_num
+  FROM ratings_by_time bt
+  JOIN rating_timeline tl ON bt.row_num = tl.row_num + 1
+)
+SELECT tm.datacriacao, tm.valor
+FROM rating_timeline tm;
