@@ -123,3 +123,10 @@ rating_timeline(valor, datacriacao, row_num) AS (
 )
 SELECT tm.datacriacao, tm.valor
 FROM rating_timeline tm;
+
+--query para puxar avaliações de um usuário
+SELECT a.datacriacao, a.valor, a.comentario
+FROM avaliacao AS a
+JOIN usuario AS u ON u.IdUsuario = a.IdUsuarioReceptor
+JOIN usuario AS esc ON esc.IdUsuario = a.IdUsuarioEscritor
+WHERE u.IdUsuario = 1
