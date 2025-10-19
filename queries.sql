@@ -104,6 +104,7 @@ SELECT
     ) AS PorcentagemHomemRatingMenor
 FROM PegarRatingDoMatch;
 
+-- query para cálculo do rating de um usuário
 WITH RECURSIVE ratings_by_time AS (
   SELECT valor, datacriacao, ROW_NUMBER() OVER (ORDER BY datacriacao) AS row_num
   FROM rating
